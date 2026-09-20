@@ -7,14 +7,17 @@ export const SmoothScroller = () => {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    // Enable native hardware touch scrolling on touch devices to prevent lag
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    if (isTouch) return;
+
     const lenis = new Lenis({
-      duration: 1.3,
+      duration: 0.7,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.8,
+      wheelMultiplier: 1.0,
     });
     lenisRef.current = lenis;
 
