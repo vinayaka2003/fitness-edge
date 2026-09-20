@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useScroll } from 'motion/react';
 import { Button } from '../common/Button';
 import { AnimatedCounter } from '../common/AnimatedCounter';
@@ -15,6 +15,7 @@ const VIDEO_POSTER = '/videos/poster-lifting.webp';
 export const Hero: React.FC<HeroProps> = ({ onStartBuild, onExploreFacilities }) => {
   const containerRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -39,7 +40,21 @@ export const Hero: React.FC<HeroProps> = ({ onStartBuild, onExploreFacilities })
 
   useEffect(() => {
     if (videoRef.current) {
+      const handlePlay = () => setIsVideoReady(true);
+      videoRef.current.addEventListener('playing', handlePlay);
       videoRef.current.play().catch(() => {});
+
+      // Fallback timer to unveil video smooth transition after 2 seconds
+      const timer = setTimeout(() => {
+        setIsVideoReady(true);
+      }, 2000);
+
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('playing', handlePlay);
+        }
+        clearTimeout(timer);
+      };
     }
   }, []);
 
@@ -49,11 +64,19 @@ export const Hero: React.FC<HeroProps> = ({ onStartBuild, onExploreFacilities })
       onMouseMove={handleMouseMove}
       className="relative min-h-[100svh] sm:min-h-screen flex items-center justify-center overflow-hidden bg-[#070709] pt-16"
     >
-      {/* Background Cinematic Video with Loop & Subtle Scroll Parallax */}
+      {/* Background Cinematic Video & Instant Poster with Loop & Subtle Scroll Parallax */}
       <motion.div
         style={{ y: videoY, scale: videoScale }}
         className="absolute inset-0 z-0 overflow-hidden will-change-transform"
       >
+        {/* Instant Poster Image Layer */}
+        <img
+          src={VIDEO_POSTER}
+          alt="Gym Lifting Poster"
+          className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none filter contrast-[102%] brightness-95"
+        />
+
+        {/* Video Overlay with Smooth 2-3s Unveil Transition */}
         <video
           ref={videoRef}
           autoPlay
@@ -61,18 +84,20 @@ export const Hero: React.FC<HeroProps> = ({ onStartBuild, onExploreFacilities })
           muted
           playsInline
           preload="auto"
-          poster={VIDEO_POSTER}
-          className="w-full h-full object-cover select-none pointer-events-none filter contrast-[102%] brightness-90 transition-opacity duration-700"
+          onPlaying={() => setIsVideoReady(true)}
+          className={`absolute inset-0 w-full h-full object-cover select-none pointer-events-none filter contrast-[102%] brightness-95 transition-opacity duration-1000 ${
+            isVideoReady ? 'opacity-100' : 'opacity-0'
+          }`}
         >
           <source src={VIDEO_SRC} type="video/mp4" />
         </video>
 
-        {/* Uniform Black Tint Layer */}
-        <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+        {/* Lighter, Clean Black Tint Layer */}
+        <div className="absolute inset-0 bg-black/35 pointer-events-none" />
 
         {/* Soft atmospheric gradient from top under navbar into floor */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[#070709] pointer-events-none" />
-        <div className="absolute inset-0 bg-radial at-center from-transparent via-black/25 to-black/70 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-[#070709] pointer-events-none" />
+        <div className="absolute inset-0 bg-radial at-center from-transparent via-black/20 to-black/60 pointer-events-none" />
       </motion.div>
 
       {/* Dynamic Cursor Spotlight Layer */}
