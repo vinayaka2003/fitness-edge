@@ -1,0 +1,6 @@
+{
+  "name": "TheFit24 - Yelahanka Bangalore's 24/7 Fitness Hub",
+  "description": "Get fit anytime with top-notch equipment and expert trainers. Your fitness journey starts now!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
